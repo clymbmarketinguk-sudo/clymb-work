@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLYMB — Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--black:#050508;
+--deep:#0a0a12;
+--card:#0f0f1a;
+--border:#1e1e2e;
+--cyan:#00e5ff;
+--violet:#7c3aed;
+--gold:#d4a853;
+--white:#f0f0f8;
+--muted:#6b6b8a;
+--font-display:'Syne',sans-serif;
+--font-body:'Space Grotesk',sans-serif;
+--font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+background:var(--black);
+color:var(--white);
+font-family:var(--font-body);
+overflow-x:hidden;
+cursor:none;
+}
+
+/* CUSTOM CURSOR */
+#cursor{
+position:fixed;width:12px;height:12px;
+background:var(--cyan);border-radius:50%;
+pointer-events:none;z-index:9999;
+transform:translate(-50%,-50%);
+transition:transform 0.1s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease;
+mix-blend-mode:difference;
+}
+#cursor-ring{
+position:fixed;width:40px;height:40px;
+border:1px solid rgba(0,229,255,0.4);
+border-radius:50%;pointer-events:none;z-index:9998;
+transform:translate(-50%,-50%);
+transition:transform 0.15s ease, width 0.4s ease, height 0.4s ease, opacity 0.3s ease;
+}
+body:hover #cursor{opacity:1}
+
+/* CANVAS */
+#hero-canvas{
+position:fixed;top:0;left:0;width:100%;height:100%;
+z-index:0;pointer-events:none;
+}
+
+/* NOISE OVERLAY */
+body::before{
+content:'';position:fixed;inset:0;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+pointer-events:none;z-index:1;opacity:0.6;
+}
+
+/* NAV */
+nav{
+position:fixed;top:0;left:0;right:0;
+padding:1.5rem 4rem;
+display:flex;justify-content:space-between;align-items:center;
+z-index:100;
+background:linear-gradient(to bottom, rgba(5,5,8,0.9), transparent);
+backdrop-filter:blur(10px);
+}
+.nav-logo{
+font-family:var(--font-display);
+font-size:1.5rem;font-weight:800;
+letter-spacing:-0.02em;
+color:var(--white);
+text-decoration:none;
+}
+.nav-logo span{color:var(--cyan);}
+.nav-link{
+font-family:var(--font-mono);
+font-size:0.75rem;letter-spacing:0.15em;
+color:var(--muted);text-decoration:none;
+text-transform:uppercase;
+transition:color 0.3s;
+}
+.nav-link:hover{color:var(--cyan);}
+
+/* HERO */
+#hero{
+position:relative;
+min-height:100vh;
+display:flex;flex-direction:column;
+justify-content:center;align-items:center;
+text-align:center;
+padding:8rem 2rem 4rem;
+z-index:2;
+}
+.hero-tag{
+font-family:var(--font-mono);
+font-size:0.7rem;letter-spacing:0.25em;
+color:var(--cyan);text-transform:uppercase;
+margin-bottom:2rem;
+display:inline-flex;align-items:center;gap:0.75rem;
+opacity:0;transform:translateY(20px);
+}
+.hero-tag::before,.hero-tag::after{
+content:'';display:inline-block;
+width:40px;height:1px;background:var(--cyan);opacity:0.5;
+}
+.hero-title{
+font-family:var(--font-display);
+font-size:clamp(3.5rem,9vw,8rem);
+font-weight:800;line-height:0.9;
+letter-spacing:-0.04em;
+color:var(--white);
+margin-bottom:1.5rem;
+opacity:0;transform:translateY(40px);
+}
+.hero-title .line{display:block;overflow:hidden;}
+.hero-title .accent{
+color:transparent;
+-webkit-text-stroke:1px rgba(0,229,255,0.4);
+}
+.hero-title .glow{
+color:var(--cyan);
+text-shadow:0 0 80px rgba(0,229,255,0.4);
+}
+.hero-sub{
+font-size:1.05rem;
+color:var(--muted);
+max-width:520px;
+line-height:1.7;
+margin-bottom:3rem;
+opacity:0;transform:translateY(20px);
+}
+
+/* STATS TICKER */
+.stats-bar{
+position:relative;z-index:2;
+padding:1.5rem 0;
+border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);
+overflow:hidden;
+display:flex;
+margin-bottom:0;
+}
+.stats-track{
+display:flex;gap:0;
+animation:ticker 25s linear infinite;
+white-space:nowrap;
+}
+.stat-item{
+display:inline-flex;align-items:center;
+gap:3rem;padding:0 3rem;
+font-family:var(--font-mono);
+font-size:0.7rem;letter-spacing:0.15em;
+color:var(--muted);text-transform:uppercase;
+}
+.stat-item strong{color:var(--cyan);font-size:1rem;font-family:var(--font-display);}
+.stat-sep{color:var(--border);opacity:0.6;}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+section{position:relative;z-index:2;}
+
+.section-header{
+padding:5rem 4rem 2rem;
+display:flex;justify-content:space-between;align-items:flex-end;
+}
+.section-label{
+font-family:var(--font-mono);
+font-size:0.65rem;letter-spacing:0.25em;
+color:var(--cyan);text-transform:uppercase;
+margin-bottom:1rem;
+}
+.section-title{
+font-family:var(--font-display);
+font-size:clamp(2rem,4vw,3.5rem);
+font-weight:800;letter-spacing:-0.03em;
+line-height:1;
+}
+.section-count{
+font-family:var(--font-display);
+font-size:5rem;font-weight:800;
+color:transparent;
+-webkit-text-stroke:1px var(--border);
+line-height:1;
+}
+
+/* FEATURED PROJECT */
+#featured{padding:2rem 4rem 4rem;}
+.featured-card{
+position:relative;
+border:1px solid var(--border);
+border-radius:16px;overflow:hidden;
+background:var(--card);
+display:grid;grid-template-columns:1fr 1fr;
+min-height:520px;
+transition:border-color 0.4s;
+cursor:none;
+}
+.featured-card:hover{border-color:rgba(0,229,255,0.3);}
+.featured-visual{
+position:relative;overflow:hidden;
+background:linear-gradient(135deg, #0a0a1a, #050510);
+display:flex;align-items:center;justify-content:center;
+}
+.featured-visual .site-preview{
+position:absolute;inset:0;
+display:flex;align-items:center;justify-content:center;
+}
+.browser-mock{
+width:85%;border-radius:8px;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 40px 80px rgba(0,0,0,0.6);
+transform:perspective(1000px) rotateY(-5deg) rotateX(3deg);
+transition:transform 0.6s ease;
+background:#111;
+}
+.featured-card:hover .browser-mock{
+transform:perspective(1000px) rotateY(0deg) rotateX(0deg);
+}
+.browser-bar{
+background:#1a1a2e;padding:8px 12px;
+display:flex;align-items:center;gap:8px;
+border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.browser-dot{
+width:8px;height:8px;border-radius:50%;
+}
+.browser-dot:nth-child(1){background:#ff5f57;}
+.browser-dot:nth-child(2){background:#ffbd2e;}
+.browser-dot:nth-child(3){background:#28ca41;}
+.browser-url{
+flex:1;background:rgba(255,255,255,0.06);
+border-radius:4px;padding:3px 10px;
+font-family:var(--font-mono);font-size:0.6rem;
+color:var(--muted);margin-left:8px;
+}
+.browser-content{
+width:100%;aspect-ratio:16/9;
+background:linear-gradient(135deg,#0d1117,#1a0a2e);
+display:flex;align-items:center;justify-content:center;
+overflow:hidden;position:relative;
+}
+.browser-content img{width:100%;height:100%;object-fit:cover;object-position:top;}
+.browser-content .placeholder-site{
+width:100%;height:100%;
+display:flex;flex-direction:column;
+}
+.placeholder-nav{
+height:10%;background:rgba(0,229,255,0.08);
+border-bottom:1px solid rgba(0,229,255,0.1);
+}
+.placeholder-hero{
+flex:1;background:linear-gradient(135deg,rgba(0,229,255,0.03),rgba(124,58,237,0.05));
+display:flex;align-items:center;justify-content:center;
+padding:20px;
+}
+.placeholder-lines{display:flex;flex-direction:column;gap:6px;width:60%;}
+.placeholder-line{height:4px;border-radius:2px;background:rgba(255,255,255,0.12);}
+.placeholder-line.short{width:60%;}
+.placeholder-line.accent{background:rgba(0,229,255,0.4);width:40%;}
+
+.featured-info{
+padding:3.5rem;display:flex;flex-direction:column;justify-content:center;
+}
+.project-type{
+font-family:var(--font-mono);font-size:0.65rem;
+letter-spacing:0.2em;color:var(--cyan);
+text-transform:uppercase;margin-bottom:1rem;
+display:flex;align-items:center;gap:0.5rem;
+}
+.project-type::before{
+content:'';display:inline-block;
+width:20px;height:1px;background:var(--cyan);
+}
+.featured-name{
+font-family:var(--font-display);
+font-size:2.8rem;font-weight:800;
+letter-spacing:-0.03em;line-height:1;
+margin-bottom:1rem;
+}
+.featured-desc{
+color:var(--muted);font-size:0.95rem;
+line-height:1.7;margin-bottom:2rem;
+}
+.tag-list{
+display:flex;flex-wrap:wrap;gap:0.5rem;
+margin-bottom:2.5rem;
+}
+.tag{
+font-family:var(--font-mono);
+font-size:0.6rem;letter-spacing:0.12em;
+color:var(--muted);
+border:1px solid var(--border);
+padding:0.3rem 0.75rem;border-radius:100px;
+text-transform:uppercase;
+transition:all 0.3s;
+}
+.tag.highlight{color:var(--cyan);border-color:rgba(0,229,255,0.3);}
+
+.system-badges{
+display:grid;grid-template-columns:1fr 1fr;
+gap:0.75rem;margin-bottom:2.5rem;
+}
+.sys-badge{
+background:rgba(255,255,255,0.03);
+border:1px solid var(--border);
+border-radius:8px;padding:0.75rem 1rem;
+display:flex;align-items:center;gap:0.75rem;
+}
+.sys-icon{
+width:28px;height:28px;border-radius:6px;
+background:rgba(0,229,255,0.1);
+display:flex;align-items:center;justify-content:center;
+font-size:0.7rem;
+}
+.sys-label{
+font-size:0.7rem;color:var(--muted);
+font-family:var(--font-mono);
+letter-spacing:0.05em;
+}
+
+.visit-btn{
+display:inline-flex;align-items:center;gap:0.75rem;
+padding:1rem 2rem;
+border:1px solid rgba(0,229,255,0.4);
+border-radius:8px;
+color:var(--cyan);
+font-family:var(--font-mono);
+font-size:0.75rem;letter-spacing:0.12em;
+text-transform:uppercase;
+text-decoration:none;
+background:rgba(0,229,255,0.05);
+transition:all 0.3s;
+width:fit-content;
+cursor:none;
+}
+.visit-btn:hover{
+background:rgba(0,229,255,0.12);
+border-color:var(--cyan);
+box-shadow:0 0 30px rgba(0,229,255,0.15);
+}
+.visit-btn svg{width:14px;height:14px;transition:transform 0.3s;}
+.visit-btn:hover svg{transform:translate(3px,-3px);}
+
+/* GLOW ACCENT ON FEATURED */
+.featured-glow{
+position:absolute;
+top:-100px;right:-100px;
+width:400px;height:400px;
+background:radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+pointer-events:none;
+}
+
+/* PROJECT GRID */
+#projects{padding:0 4rem 4rem;}
+.projects-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:1.5rem;
+}
+.project-card{
+position:relative;
+border:1px solid var(--border);
+border-radius:12px;overflow:hidden;
+background:var(--card);
+cursor:none;
+transition:border-color 0.4s, transform 0.4s;
+transform-style:preserve-3d;
+}
+.project-card:hover{
+border-color:rgba(0,229,255,0.25);
+}
+.card-visual{
+aspect-ratio:16/10;
+background:linear-gradient(135deg,#0a0a18,#080812);
+overflow:hidden;position:relative;
+}
+.card-visual .mini-browser{
+position:absolute;inset:8px;border-radius:6px;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.06);
+box-shadow:0 20px 40px rgba(0,0,0,0.5);
+transform:perspective(800px) rotateX(4deg);
+transition:transform 0.5s ease;
+background:#111;
+}
+.project-card:hover .mini-browser{
+transform:perspective(800px) rotateX(0deg);
+}
+.mini-bar{
+height:18px;background:#1a1a2e;
+display:flex;align-items:center;padding:0 6px;gap:4px;
+border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.mini-dot{width:5px;height:5px;border-radius:50%;}
+.mini-dot:nth-child(1){background:#ff5f57;}
+.mini-dot:nth-child(2){background:#ffbd2e;}
+.mini-dot:nth-child(3){background:#28ca41;}
+.mini-url{
+flex:1;background:rgba(255,255,255,0.05);
+border-radius:3px;padding:2px 6px;
+font-family:var(--font-mono);font-size:0.45rem;
+color:var(--muted);margin-left:6px;
+}
+.mini-content{
+width:100%;
+background:#0a0a14;
+overflow:hidden;
+}
+.mini-content img{
+width:100%;height:auto;
+display:block;
+object-fit:cover;
+object-position:top center;
+}
+
+/* Color themes per card */
+.theme-shopify .card-visual{background:linear-gradient(135deg,#0a1a0a,#051205);}
+.theme-shopify .mini-bar{background:#1a2e1a;}
+.theme-restaurant .card-visual{background:linear-gradient(135deg,#1a0a00,#120800);}
+.theme-restaurant .mini-bar{background:#2e1a0a;}
+.theme-beauty .card-visual{background:linear-gradient(135deg,#1a001a,#12000f);}
+.theme-beauty .mini-bar{background:#2e0a2e;}
+.theme-delivery .card-visual{background:linear-gradient(135deg,#001a1a,#000f12);}
+.theme-delivery .mini-bar{background:#0a2e2e;}
+.theme-fashion .card-visual{background:linear-gradient(135deg,#1a1500,#120f00);}
+.theme-fashion .mini-bar{background:#2e2a0a;}
+
+.card-body{padding:1.5rem;}
+.card-category{
+font-family:var(--font-mono);font-size:0.6rem;
+letter-spacing:0.15em;color:var(--muted);
+text-transform:uppercase;margin-bottom:0.5rem;
+display:flex;align-items:center;gap:0.5rem;
+}
+.cat-dot{
+width:5px;height:5px;border-radius:50%;
+background:var(--cyan);display:inline-block;
+}
+.card-name{
+font-family:var(--font-display);
+font-size:1.4rem;font-weight:800;
+letter-spacing:-0.02em;
+margin-bottom:0.5rem;
+}
+.card-desc{
+font-size:0.8rem;color:var(--muted);
+line-height:1.6;margin-bottom:1.25rem;
+}
+.card-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem;}
+.card-tag{
+font-family:var(--font-mono);font-size:0.55rem;
+letter-spacing:0.1em;color:var(--muted);
+border:1px solid var(--border);
+padding:0.2rem 0.6rem;border-radius:100px;
+text-transform:uppercase;
+}
+.card-footer{
+display:flex;justify-content:space-between;align-items:center;
+padding-top:1rem;
+border-top:1px solid var(--border);
+}
+.card-stack{
+font-family:var(--font-mono);font-size:0.6rem;
+color:var(--muted);
+}
+.card-link{
+display:inline-flex;align-items:center;gap:0.4rem;
+font-family:var(--font-mono);font-size:0.6rem;
+letter-spacing:0.1em;color:var(--cyan);
+text-decoration:none;
+text-transform:uppercase;
+transition:gap 0.3s;
+}
+.card-link:hover{gap:0.75rem;}
+.card-link svg{width:10px;height:10px;}
+
+/* HOVER GLOW PER CARD */
+.card-glow{
+position:absolute;inset:0;
+background:radial-gradient(circle at 50% 50%, rgba(0,229,255,0.04) 0%, transparent 60%);
+opacity:0;transition:opacity 0.4s;
+pointer-events:none;
+}
+.project-card:hover .card-glow{opacity:1;}
+
+/* COMING SOON CARD */
+.coming-soon{
+border:1px dashed rgba(0,229,255,0.15);
+background:transparent;
+display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+text-align:center;
+min-height:380px;
+}
+.coming-soon .cs-icon{
+width:60px;height:60px;border-radius:12px;
+border:1px solid rgba(0,229,255,0.2);
+display:flex;align-items:center;justify-content:center;
+margin:0 auto 1.5rem;
+}
+.cs-title{
+font-family:var(--font-display);
+font-size:1.2rem;font-weight:800;
+margin-bottom:0.5rem;
+color:rgba(240,240,248,0.4);
+}
+.cs-sub{
+font-family:var(--font-mono);font-size:0.6rem;
+color:rgba(0,229,255,0.4);
+letter-spacing:0.15em;text-transform:uppercase;
+}
+
+/* CAPABILITIES STRIP */
+#capabilities{
+padding:5rem 4rem;
+border-top:1px solid var(--border);
+}
+.cap-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:1px;
+background:var(--border);
+border:1px solid var(--border);
+border-radius:12px;overflow:hidden;
+}
+.cap-item{
+background:var(--card);
+padding:2rem;
+transition:background 0.3s;
+}
+.cap-item:hover{background:rgba(0,229,255,0.03);}
+.cap-num{
+font-family:var(--font-mono);font-size:0.6rem;
+color:rgba(0,229,255,0.4);margin-bottom:1rem;
+}
+.cap-title{
+font-size:0.9rem;font-weight:600;
+margin-bottom:0.5rem;
+}
+.cap-desc{
+font-size:0.75rem;color:var(--muted);
+line-height:1.6;
+}
+
+/* CTA */
+#cta{
+padding:8rem 4rem;
+text-align:center;
+position:relative;overflow:hidden;
+}
+.cta-glow{
+position:absolute;
+top:50%;left:50%;transform:translate(-50%,-50%);
+width:600px;height:300px;
+background:radial-gradient(ellipse, rgba(0,229,255,0.06) 0%, transparent 70%);
+pointer-events:none;
+}
+.cta-title{
+font-family:var(--font-display);
+font-size:clamp(2.5rem,6vw,5rem);
+font-weight:800;
+letter-spacing:-0.03em;
+margin-bottom:1.5rem;
+}
+.cta-title span{color:var(--cyan);}
+.cta-sub{
+color:var(--muted);font-size:1rem;
+max-width:480px;margin:0 auto 3rem;
+line-height:1.7;
+}
+.cta-btn{
+display:inline-flex;align-items:center;gap:1rem;
+padding:1.25rem 3rem;
+background:var(--cyan);color:#000;
+font-family:var(--font-display);
+font-weight:700;font-size:0.9rem;
+letter-spacing:0.05em;
+border-radius:8px;text-decoration:none;
+transition:all 0.3s;cursor:none;
+text-transform:uppercase;
+}
+.cta-btn:hover{
+background:#00ffff;
+box-shadow:0 0 60px rgba(0,229,255,0.4);
+transform:translateY(-2px);
+}
+
+/* FOOTER */
+footer{
+padding:3rem 4rem;
+border-top:1px solid var(--border);
+display:flex;justify-content:space-between;align-items:center;
+}
+.footer-logo{
+font-family:var(--font-display);
+font-size:1.2rem;font-weight:800;
+}
+.footer-logo span{color:var(--cyan);}
+.footer-copy{
+font-family:var(--font-mono);font-size:0.65rem;
+color:var(--muted);letter-spacing:0.1em;
+}
+
+/* PARTICLE CANVAS */
+#particle-canvas{
+position:fixed;inset:0;pointer-events:none;
+z-index:1;opacity:0.6;
+}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(40px);}
+
+/* GRID LINE BG */
+.grid-bg{
+position:fixed;inset:0;pointer-events:none;z-index:0;
+background-image:
+linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+background-size:60px 60px;
+mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:var(--border);}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+
+/* LOADING */
+#loader{
+position:fixed;inset:0;z-index:9999;
+background:var(--black);
+display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+transition:opacity 0.6s ease;
+}
+.loader-logo{
+font-family:var(--font-display);
+font-size:2rem;font-weight:800;
+color:var(--white);
+margin-bottom:2rem;
+}
+.loader-logo span{color:var(--cyan);}
+.loader-bar{
+width:200px;height:1px;
+background:var(--border);
+position:relative;overflow:hidden;
+}
+.loader-progress{
+position:absolute;inset:0;
+background:var(--cyan);
+transform:translateX(-100%);
+animation:load 1.2s ease forwards;
+}
+@keyframes load{to{transform:translateX(0)}}
+.loader-text{
+font-family:var(--font-mono);
+font-size:0.65rem;letter-spacing:0.2em;
+color:var(--muted);text-transform:uppercase;
+margin-top:1rem;
+}
+
+@media(max-width:900px){
+nav{padding:1.25rem 1.5rem;}
+.section-header{padding:3rem 1.5rem 1.5rem;flex-direction:column;gap:1rem;}
+#featured{padding:1rem 1.5rem 3rem;}
+.featured-card{grid-template-columns:1fr;min-height:auto;}
+.featured-visual{min-height:240px;}
+.featured-info{padding:2rem 1.5rem;}
+.featured-name{font-size:2rem;}
+#projects{padding:0 1.5rem 3rem;}
+.projects-grid{grid-template-columns:1fr;gap:1rem;}
+#capabilities{padding:3rem 1.5rem;}
+.cap-grid{grid-template-columns:repeat(2,1fr);}
+#cta{padding:5rem 1.5rem;}
+footer{padding:2rem 1.5rem;flex-direction:column;gap:1rem;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">CLYMB<span>.</span></div>
+  <div class="loader-bar"><div class="loader-progress"></div></div>
+  <div class="loader-text">Loading Portfolio</div>
+</div>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="grid-bg"></div>
+<canvas id="particle-canvas"></canvas>
+<canvas id="hero-canvas"></canvas>
+
+<nav>
+  <a href="https://clymb.marketing/" class="nav-logo">CLYMB<span>.</span></a>
+  <a href="https://clymb.marketing/" class="nav-link">← Back to Home</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-tag">Selected Work 2024 — 2025</div>
+  <h1 class="hero-title">
+    <span class="line">Digital</span>
+    <span class="line accent">Ecosystems</span>
+    <span class="line glow">That Perform</span>
+  </h1>
+  <p class="hero-sub">From Shopify stores to full-stack delivery platforms with mobile apps — every project built to convert, scale and dominate AI-era search.</p>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-track" id="statsTrack">
+    <div class="stat-item"><strong>7</strong><span>Projects Delivered</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>3</strong><span>Industries</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>1</strong><span>Full App Ecosystem</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>Shopify</strong><span>Expert Builds</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>UK + India</strong><span>Clients Served</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>Custom</strong><span>Coded Systems</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>App Dev</strong><span>iOS + Android</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>7</strong><span>Projects Delivered</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>3</strong><span>Industries</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>1</strong><span>Full App Ecosystem</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>Shopify</strong><span>Expert Builds</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>UK + India</strong><span>Clients Served</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>Custom</strong><span>Coded Systems</span><span class="stat-sep">·</span></div>
+    <div class="stat-item"><strong>App Dev</strong><span>iOS + Android</span><span class="stat-sep">·</span></div>
+  </div>
+</div>
+
+<!-- FEATURED: GRABBI -->
+<section id="featured">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">Featured Build</div>
+      <div class="section-title">Most Complex Project</div>
+    </div>
+    <div class="section-count">01</div>
+  </div>
+  <div class="featured-card reveal" id="grabbiFeatured">
+    <div class="featured-glow"></div>
+    <div class="featured-visual">
+      <div class="site-preview">
+        <div class="browser-mock">
+          <div class="browser-bar">
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-url">grabbi.uk</div>
+          </div>
+          <div class="browser-content">
+            <div class="placeholder-site">
+              <div class="placeholder-nav"></div>
+              <div class="placeholder-hero" style="background:linear-gradient(135deg,rgba(0,229,255,0.05),rgba(0,150,100,0.08))">
+                <div style="text-align:center">
+                  <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:var(--white);margin-bottom:0.5rem;text-shadow:0 0 20px rgba(0,229,255,0.3)">GRABB<span style="color:var(--cyan)">I</span></div>
+                  <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--muted);letter-spacing:0.2em">GROCERY DELIVERY · 30 MINS</div>
+                  <div style="margin-top:1rem;display:flex;gap:0.5rem;justify-content:center">
+                    <div style="background:var(--cyan);color:#000;padding:4px 12px;border-radius:4px;font-size:0.55rem;font-family:var(--font-mono);font-weight:700">ORDER NOW</div>
+                    <div style="border:1px solid rgba(0,229,255,0.3);color:var(--cyan);padding:4px 12px;border-radius:4px;font-size:0.55rem;font-family:var(--font-mono)">TRACK</div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:8px;background:#080810;display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+                <div style="background:rgba(0,229,255,0.06);border-radius:4px;padding:4px;text-align:center"><div style="font-size:0.4rem;color:var(--muted);font-family:var(--font-mono)">Fresh</div></div>
+                <div style="background:rgba(0,229,255,0.06);border-radius:4px;padding:4px;text-align:center"><div style="font-size:0.4rem;color:var(--muted);font-family:var(--font-mono)">Butcher</div></div>
+                <div style="background:rgba(0,229,255,0.06);border-radius:4px;padding:4px;text-align:center"><div style="font-size:0.4rem;color:var(--muted);font-family:var(--font-mono)">World</div></div>
+                <div style="background:rgba(0,229,255,0.06);border-radius:4px;padding:4px;text-align:center"><div style="font-size:0.4rem;color:var(--muted);font-family:var(--font-mono)">Veg</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="featured-info">
+      <div class="project-type">Full-Stack Ecosystem</div>
+      <h2 class="featured-name">Grabbi</h2>
+      <p class="featured-desc">The most technically complex build in the CLYMB portfolio. A complete grocery delivery ecosystem serving Aberkenfig & Porthcawl — built from the ground up with a customer web platform, iOS & Android apps, driver tracking app, and a full admin system for order management and staff operations.</p>
+      <div class="system-badges">
+        <div class="sys-badge">
+          <div class="sys-icon">🌐</div>
+          <div class="sys-label">Web Platform</div>
+        </div>
+        <div class="sys-badge">
+          <div class="sys-icon">📱</div>
+          <div class="sys-label">iOS + Android App</div>
+        </div>
+        <div class="sys-badge">
+          <div class="sys-icon">🚗</div>
+          <div class="sys-label">Driver App</div>
+        </div>
+        <div class="sys-badge">
+          <div class="sys-icon">⚙️</div>
+          <div class="sys-label">Admin Dashboard</div>
+        </div>
+      </div>
+      <div class="tag-list">
+        <span class="tag highlight">Custom Code</span>
+        <span class="tag highlight">App Development</span>
+        <span class="tag">Order Management</span>
+        <span class="tag">Real-Time Tracking</span>
+        <span class="tag">Staff Systems</span>
+        <span class="tag">SEO Optimised</span>
+      </div>
+      <a href="https://grabbi.uk/" target="_blank" class="visit-btn">
+        Visit Live Site
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ALL PROJECTS GRID -->
+<section id="projects">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">All Projects</div>
+      <div class="section-title">Every Build</div>
+    </div>
+    <div class="section-count">06</div>
+  </div>
+  <div class="projects-grid">
+
+    <!-- Karee -->
+    <div class="project-card reveal theme-fashion" id="card-karee">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="mini-browser">
+          <div class="mini-bar">
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-url">karee.co.uk</div>
+          </div>
+          <div class="mini-content">
+            <div style="padding:8px;background:#0a0a10;min-height:120px">
+              <div style="background:rgba(212,168,83,0.08);border-radius:4px;padding:10px;text-align:center;margin-bottom:6px">
+                <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:var(--gold);letter-spacing:0.1em">KAREE</div>
+                <div style="font-family:var(--font-mono);font-size:0.4rem;color:var(--muted);letter-spacing:0.15em;margin-top:2px">SUSTAINABLE FASHION</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+                <div style="background:rgba(212,168,83,0.06);border-radius:3px;height:50px;"></div>
+                <div style="background:rgba(212,168,83,0.06);border-radius:3px;height:50px;"></div>
+                <div style="background:rgba(212,168,83,0.06);border-radius:3px;height:50px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-category"><span class="cat-dot" style="background:var(--gold)"></span>Shopify · Fashion</div>
+        <div class="card-name">Karee Clothing</div>
+        <div class="card-desc">Premium sustainable fashion brand. UK-designed, India-crafted. Dual domain (UK + India), custom wishlist, city-specific SEO pages, kids & women's collections.</div>
+        <div class="card-tags">
+          <span class="card-tag">Shopify</span>
+          <span class="card-tag">Custom Liquid</span>
+          <span class="card-tag">Multi-Domain</span>
+          <span class="card-tag">Sustainable</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-stack">Shopify + Custom Dev</span>
+          <a href="https://www.karee.co.uk/" target="_blank" class="card-link">
+            Visit Site
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fusion Clan -->
+    <div class="project-card reveal theme-restaurant" id="card-fusion">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="mini-browser">
+          <div class="mini-bar">
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-url">fusionclanwarwick.co.uk</div>
+          </div>
+          <div class="mini-content">
+            <div style="padding:8px;background:#0a0800;min-height:120px">
+              <div style="background:linear-gradient(135deg,rgba(40,30,0,0.8),rgba(20,10,0,0.9));border-radius:4px;padding:10px;text-align:center;margin-bottom:6px">
+                <div style="font-family:var(--font-display);font-size:0.8rem;font-weight:800;color:#e8c97a;letter-spacing:0.05em">Fusion Clan</div>
+                <div style="font-family:var(--font-mono);font-size:0.38rem;color:rgba(200,180,100,0.5);letter-spacing:0.1em;margin-top:2px">INDIAN FUSION · WARWICK</div>
+                <div style="margin-top:6px;display:flex;gap:4px;justify-content:center">
+                  <div style="background:#e8c97a;color:#000;padding:2px 8px;border-radius:3px;font-size:0.38rem;font-family:var(--font-mono)">Book Table</div>
+                  <div style="border:1px solid rgba(232,201,122,0.3);color:#e8c97a;padding:2px 8px;border-radius:3px;font-size:0.38rem;font-family:var(--font-mono)">Takeaway</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="background:rgba(232,201,122,0.05);border-radius:3px;height:40px;display:flex;align-items:center;justify-content:center"><div style="font-size:0.38rem;color:rgba(232,201,122,0.4);font-family:var(--font-mono)">MENU</div></div>
+                <div style="background:rgba(232,201,122,0.05);border-radius:3px;height:40px;display:flex;align-items:center;justify-content:center"><div style="font-size:0.38rem;color:rgba(232,201,122,0.4);font-family:var(--font-mono)">RESERVE</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-category"><span class="cat-dot" style="background:#e8c97a"></span>Custom Code · Restaurant</div>
+        <div class="card-name">Fusion Clan</div>
+        <div class="card-desc">Premium Indian fusion restaurant in Warwick. Full booking integration, multi-menu system, wine list, takeaway ordering, and event catering pages.</div>
+        <div class="card-tags">
+          <span class="card-tag">Custom Coded</span>
+          <span class="card-tag">Booking System</span>
+          <span class="card-tag">Multi-Menu</span>
+          <span class="card-tag">SEO</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-stack">Custom + Hostinger</span>
+          <a href="https://www.fusionclanwarwick.co.uk/" target="_blank" class="card-link">
+            Visit Site
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nacre Beauty -->
+    <div class="project-card reveal theme-beauty" id="card-nacre">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="mini-browser">
+          <div class="mini-bar">
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-url">nacrebeauty.co.uk</div>
+          </div>
+          <div class="mini-content">
+            <div style="padding:8px;background:#0a000a;min-height:120px">
+              <div style="background:linear-gradient(135deg,rgba(180,0,120,0.08),rgba(100,0,80,0.06));border-radius:4px;padding:10px;text-align:center;margin-bottom:6px">
+                <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:#d4a8c7;letter-spacing:0.15em">NACRE</div>
+                <div style="font-family:var(--font-mono);font-size:0.38rem;color:rgba(200,150,190,0.5);letter-spacing:0.15em;margin-top:2px">HAIR & BEAUTY · NEWPORT</div>
+                <div style="margin-top:6px">
+                  <div style="background:rgba(212,168,199,0.2);border-radius:3px;padding:2px 8px;display:inline-block;font-size:0.38rem;font-family:var(--font-mono);color:#d4a8c7">Book Appointment</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+                <div style="background:rgba(212,168,199,0.04);border-radius:3px;height:36px;"></div>
+                <div style="background:rgba(212,168,199,0.04);border-radius:3px;height:36px;"></div>
+                <div style="background:rgba(212,168,199,0.04);border-radius:3px;height:36px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-category"><span class="cat-dot" style="background:#d4a8c7"></span>Custom Code · Beauty</div>
+        <div class="card-name">Nacre Beauty</div>
+        <div class="card-desc">Award-winning hair and beauty salon in Newport. Luxurious online presence with booking integration, service showcase, and local SEO optimisation.</div>
+        <div class="card-tags">
+          <span class="card-tag">Custom Coded</span>
+          <span class="card-tag">Booking</span>
+          <span class="card-tag">Local SEO</span>
+          <span class="card-tag">Beauty</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-stack">Custom + Hostinger</span>
+          <a href="https://nacrebeauty.co.uk/" target="_blank" class="card-link">
+            Visit Site
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Curry Stories -->
+    <div class="project-card reveal theme-restaurant" id="card-curry">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="mini-browser">
+          <div class="mini-bar">
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-url">currystorieswarwick.co.uk</div>
+          </div>
+          <div class="mini-content">
+            <div style="padding:8px;background:#0a0600;min-height:120px">
+              <div style="background:linear-gradient(135deg,rgba(200,80,0,0.1),rgba(150,40,0,0.08));border-radius:4px;padding:10px;text-align:center;margin-bottom:6px">
+                <div style="font-family:var(--font-display);font-size:0.85rem;font-weight:800;color:#e8804a;letter-spacing:0.05em">Curry Stories</div>
+                <div style="font-family:var(--font-mono);font-size:0.38rem;color:rgba(232,128,74,0.5);letter-spacing:0.1em;margin-top:2px">KERALA FOOD · WARWICK</div>
+                <div style="margin-top:6px;display:flex;gap:4px;justify-content:center">
+                  <div style="background:rgba(232,128,74,0.2);color:#e8804a;padding:2px 8px;border-radius:3px;font-size:0.38rem;font-family:var(--font-mono)">Catering Quote</div>
+                  <div style="background:rgba(232,128,74,0.08);color:#e8804a;padding:2px 8px;border-radius:3px;font-size:0.38rem;font-family:var(--font-mono)">Takeaway</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-category"><span class="cat-dot" style="background:#e8804a"></span>Custom Code · F&B</div>
+        <div class="card-name">Curry Stories</div>
+        <div class="card-desc">Authentic Kerala cuisine and catering in Warwick. Instant quote system, event/corporate catering menus, takeaway integration, and full SEO architecture.</div>
+        <div class="card-tags">
+          <span class="card-tag">Custom Coded</span>
+          <span class="card-tag">Catering System</span>
+          <span class="card-tag">Instant Quote</span>
+          <span class="card-tag">SEO</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-stack">Custom + Hostinger</span>
+          <a href="https://currystorieswarwick.co.uk/" target="_blank" class="card-link">
+            Visit Site
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Karee India (Shopify) -->
+    <div class="project-card reveal theme-shopify" id="card-kareeind">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="mini-browser">
+          <div class="mini-bar">
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-dot"></div>
+            <div class="mini-url">kareeclothing.com</div>
+          </div>
+          <div class="mini-content">
+            <div style="padding:8px;background:#050a05;min-height:120px">
+              <div style="background:rgba(40,100,60,0.1);border-radius:4px;padding:10px;text-align:center;margin-bottom:6px">
+                <div style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#6dc66d;padding:1px 6px;border-radius:3px;display:inline-block;font-family:var(--font-mono);letter-spacing:0.1em;margin-bottom:4px">Shopify Store</div>
+                <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:#a8d4b0">Karee India</div>
+                <div style="font-family:var(--font-mono);font-size:0.38rem;color:rgba(150,210,160,0.5);letter-spacing:0.1em;margin-top:2px">SUSTAINABLE FASHION · INDIA</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+                <div style="background:rgba(100,200,100,0.05);border-radius:3px;height:45px;"></div>
+                <div style="background:rgba(100,200,100,0.05);border-radius:3px;height:45px;"></div>
+                <div style="background:rgba(100,200,100,0.05);border-radius:3px;height:45px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-category"><span class="cat-dot" style="background:#6dc66d"></span>Shopify · Fashion</div>
+        <div class="card-name">Karee India</div>
+        <div class="card-desc">India-specific Shopify expansion for Karee. City-targeted SEO landing pages for Mumbai, Delhi, Bangalore and Pune. Sustainable fashion brand scaling into South Asia.</div>
+        <div class="card-tags">
+          <span class="card-tag">Shopify</span>
+          <span class="card-tag">India Market</span>
+          <span class="card-tag">City SEO</span>
+          <span class="card-tag">E-commerce</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-stack">Shopify</span>
+          <a href="https://kareeclothing.com/" target="_blank" class="card-link">
+            Visit Site
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="project-card coming-soon reveal">
+      <div style="padding:2rem;text-align:center;">
+        <div class="cs-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="cs-title">3D & AI Builds</div>
+        <div class="cs-sub">Coming Soon</div>
+        <div style="margin-top:1.5rem;font-size:0.7rem;color:var(--muted);line-height:1.7;max-width:200px;margin-left:auto;margin-right:auto">Next-generation Three.js powered experiences and AI-integrated platforms</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section id="capabilities">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">What We Build</div>
+      <div class="section-title">Core Capabilities</div>
+    </div>
+  </div>
+  <div class="cap-grid reveal">
+    <div class="cap-item">
+      <div class="cap-num">01</div>
+      <div class="cap-title">Shopify Development</div>
+      <div class="cap-desc">Custom themes, Liquid development, multi-currency, wishlist systems, and conversion-optimised stores built for scale.</div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-num">02</div>
+      <div class="cap-title">Custom Web Systems</div>
+      <div class="cap-desc">Bespoke coded websites with booking engines, catering quote systems, menus, and advanced local SEO architecture.</div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-num">03</div>
+      <div class="cap-title">App Development</div>
+      <div class="cap-desc">Full-stack mobile apps for iOS and Android — customer apps, driver tracking systems, and staff management tools.</div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-num">04</div>
+      <div class="cap-title">AI-Era SEO + GEO</div>
+      <div class="cap-desc">Semantic search, entity architecture, LLM discoverability, AEO, and structured data — built for 2026 search ecosystems.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <h2 class="cta-title reveal">Ready to build<br>something <span>remarkable?</span></h2>
+  <p class="cta-sub reveal">Let's design your digital ecosystem — from Shopify stores to full-stack platforms with AI-era search built in from day one.</p>
+  <a href="https://calendly.com/clymbmarketinguk/30min" target="_blank" class="cta-btn reveal">
+    Book a Discovery Call
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+  </a>
+</section>
+
+<footer>
+  <div class="footer-logo">CLYMB<span>.</span></div>
+  <div class="footer-copy">© 2025 CLYMB Marketing · AI-Powered Digital Ecosystems · UK</div>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.project-card,.featured-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cursor.style.width='20px';cursor.style.height='20px';
+    cursor.style.background='transparent';
+    cursor.style.border='1px solid var(--cyan)';
+    ring.style.width='60px';ring.style.height='60px';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cursor.style.width='12px';cursor.style.height='12px';
+    cursor.style.background='var(--cyan)';
+    cursor.style.border='none';
+    ring.style.width='40px';ring.style.height='40px';
+  });
+});
+
+// PARTICLES
+const pCanvas = document.getElementById('particle-canvas');
+const pCtx = pCanvas.getContext('2d');
+pCanvas.width=window.innerWidth;pCanvas.height=window.innerHeight;
+const particles=[];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random()*pCanvas.width,
+    y:Math.random()*pCanvas.height,
+    r:Math.random()*1.5+0.5,
+    sx:(Math.random()-0.5)*0.3,
+    sy:(Math.random()-0.5)*0.3,
+    o:Math.random()*0.4+0.1
+  });
+}
+function drawParticles(){
+  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  particles.forEach(p=>{
+    pCtx.beginPath();
+    pCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    pCtx.fillStyle=`rgba(0,229,255,${p.o})`;
+    pCtx.fill();
+    p.x+=p.sx;p.y+=p.sy;
+    if(p.x<0||p.x>pCanvas.width)p.sx*=-1;
+    if(p.y<0||p.y>pCanvas.height)p.sy*=-1;
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// THREE.JS HERO BACKGROUND
+const hCanvas = document.getElementById('hero-canvas');
+const renderer = new THREE.WebGLRenderer({canvas:hCanvas,alpha:true,antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,100);
+camera.position.z=5;
+
+// Floating geometric shapes
+const shapes=[];
+const geos=[
+  new THREE.IcosahedronGeometry(0.3,0),
+  new THREE.OctahedronGeometry(0.25,0),
+  new THREE.TetrahedronGeometry(0.3,0),
+  new THREE.IcosahedronGeometry(0.15,0),
+  new THREE.OctahedronGeometry(0.2,0),
+];
+const mat1=new THREE.MeshBasicMaterial({color:0x00e5ff,wireframe:true,transparent:true,opacity:0.15});
+const mat2=new THREE.MeshBasicMaterial({color:0x7c3aed,wireframe:true,transparent:true,opacity:0.1});
+const mat3=new THREE.MeshBasicMaterial({color:0xd4a853,wireframe:true,transparent:true,opacity:0.08});
+const mats=[mat1,mat2,mat3];
+
+for(let i=0;i<12;i++){
+  const geo=geos[Math.floor(Math.random()*geos.length)];
+  const mat=mats[Math.floor(Math.random()*mats.length)];
+  const mesh=new THREE.Mesh(geo,mat);
+  mesh.position.set(
+    (Math.random()-0.5)*12,
+    (Math.random()-0.5)*8,
+    (Math.random()-0.5)*4-2
+  );
+  mesh.userData={
+    rotX:(Math.random()-0.5)*0.008,
+    rotY:(Math.random()-0.5)*0.008,
+    rotZ:(Math.random()-0.5)*0.006,
+    floatY:Math.random()*Math.PI*2,
+    floatSpeed:0.003+Math.random()*0.004,
+    floatAmp:0.05+Math.random()*0.1,
+    origY:mesh.position.y
+  };
+  scene.add(mesh);
+  shapes.push(mesh);
+}
+
+// Grid plane
+const gridHelper = new THREE.GridHelper(20,30,0x00e5ff,0x111122);
+gridHelper.position.y=-4;
+gridHelper.material.transparent=true;
+gridHelper.material.opacity=0.08;
+scene.add(gridHelper);
+
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=(e.clientX/window.innerWidth-0.5)*0.5;
+  mouseY=(e.clientY/window.innerHeight-0.5)*0.3;
+});
+
+function animThree(){
+  requestAnimationFrame(animThree);
+  shapes.forEach(s=>{
+    s.rotation.x+=s.userData.rotX;
+    s.rotation.y+=s.userData.rotY;
+    s.rotation.z+=s.userData.rotZ;
+    s.userData.floatY+=s.userData.floatSpeed;
+    s.position.y=s.userData.origY+Math.sin(s.userData.floatY)*s.userData.floatAmp;
+  });
+  camera.position.x+=(mouseX-camera.position.x)*0.05;
+  camera.position.y+=(-mouseY-camera.position.y)*0.05;
+  camera.lookAt(scene.position);
+  gridHelper.rotation.y+=0.001;
+  renderer.render(scene,camera);
+}
+animThree();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  pCanvas.width=window.innerWidth;pCanvas.height=window.innerHeight;
+});
+
+// GSAP SCROLLTRIGGER
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero animations
+gsap.to('.hero-tag',{opacity:1,y:0,duration:1,delay:1.4,ease:'power3.out'});
+gsap.to('.hero-title',{opacity:1,y:0,duration:1.2,delay:1.6,ease:'power3.out'});
+gsap.to('.hero-sub',{opacity:1,y:0,duration:1,delay:1.9,ease:'power3.out'});
+
+// Scroll reveals
+gsap.utils.toArray('.reveal').forEach((el,i)=>{
+  gsap.fromTo(el,
+    {opacity:0,y:50},
+    {opacity:1,y:0,duration:0.9,ease:'power3.out',
+     scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none none'},
+     delay:i*0.04
+    }
+  );
+});
+
+// 3D TILT on project cards
+document.querySelectorAll('.project-card:not(.coming-soon)').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-0.5;
+    const y=(e.clientY-r.top)/r.height-0.5;
+    card.style.transform=`perspective(1000px) rotateY(${x*10}deg) rotateX(${-y*6}deg) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='perspective(1000px) rotateY(0) rotateX(0) scale(1)';
+    card.style.transition='transform 0.6s ease';
+  });
+  card.addEventListener('mouseenter',()=>{
+    card.style.transition='transform 0.15s ease';
+  });
+});
+
+// Featured card tilt
+const fc=document.getElementById('grabbiFeatured');
+if(fc){
+  fc.addEventListener('mousemove',e=>{
+    const r=fc.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-0.5;
+    const y=(e.clientY-r.top)/r.height-0.5;
+    fc.style.transform=`perspective(1400px) rotateY(${x*4}deg) rotateX(${-y*2}deg)`;
+    fc.style.transition='transform 0.15s ease';
+  });
+  fc.addEventListener('mouseleave',()=>{
+    fc.style.transform='perspective(1400px) rotateY(0) rotateX(0)';
+    fc.style.transition='transform 0.6s ease';
+  });
+}
+
+// LOADER
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const loader=document.getElementById('loader');
+    loader.style.opacity='0';
+    setTimeout(()=>loader.style.display='none',600);
+  },1400);
+});
+</script>
+</body>
+</html>
