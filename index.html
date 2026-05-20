@@ -54,15 +54,42 @@ nav{position:fixed;top:0;left:0;right:0;padding:1rem 1.25rem;display:flex;justif
 .nav-link{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .3s;padding:.4rem .75rem;border:1px solid var(--border);border-radius:100px}
 .nav-link:hover{color:var(--cyan);border-color:rgba(0,229,255,.3)}
 
-/* HERO - MOBILE FIRST */
-#hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:7rem 1.5rem 3rem;z-index:2;overflow:hidden;width:100%}
-.hero-tag{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;margin-bottom:1.5rem;display:inline-flex;align-items:center;gap:.6rem;opacity:0;transform:translateY(20px)}
-.hero-tag::before,.hero-tag::after{content:'';display:inline-block;width:24px;height:1px;background:var(--cyan);opacity:.5}
-.hero-title{font-family:var(--font-display);font-size:clamp(2rem,9vw,8rem);font-weight:800;line-height:.95;letter-spacing:-.03em;margin-bottom:1.25rem;opacity:0;transform:translateY(40px);width:100%;word-break:break-word;overflow-wrap:break-word}
+/* HERO - MOBILE FIRST - FULL CINEMATIC LAYOUT */
+#hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding:0;z-index:2;overflow:hidden;width:100%}
+
+/* TOP BAR */
+.hero-top{padding:5.5rem 1.5rem 0;display:flex;justify-content:center}
+.hero-agency-tag{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;display:inline-flex;align-items:center;gap:.6rem;border:1px solid var(--border);padding:.4rem 1rem;border-radius:100px;opacity:0;animation:fadeUp .8s ease 1.2s forwards}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,229,255,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,229,255,0)}}
+
+/* CENTRE */
+.hero-centre{padding:0 1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;flex:1;justify-content:center;gap:1.25rem}
+.hero-tag{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;display:inline-flex;align-items:center;gap:.6rem;opacity:0;animation:fadeUp .8s ease 1.4s forwards}
+.hero-tag::before,.hero-tag::after{content:'';display:inline-block;width:20px;height:1px;background:var(--cyan);opacity:.5}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-title{font-family:var(--font-display);font-size:clamp(2rem,9vw,8rem);font-weight:800;line-height:.95;letter-spacing:-.03em;width:100%;opacity:0;animation:fadeUp 1s ease 1.6s forwards}
 .hero-title .accent{display:block;color:transparent;-webkit-text-stroke:1px rgba(0,229,255,.4);font-size:clamp(1.6rem,7.5vw,8rem)}
 .hero-title .glow{display:block;color:var(--cyan);text-shadow:0 0 60px rgba(0,229,255,.3)}
 .hero-title .plain{display:block}
-.hero-sub{font-size:clamp(.85rem,3.5vw,1.05rem);color:var(--muted);max-width:480px;line-height:1.7;margin-bottom:2.5rem;opacity:0;transform:translateY(20px);padding:0 .5rem}
+.hero-sub{font-size:clamp(.82rem,3.2vw,1rem);color:var(--muted);max-width:460px;line-height:1.75;opacity:0;animation:fadeUp .9s ease 1.9s forwards}
+.hero-cta{display:inline-flex;align-items:center;gap:.6rem;padding:.85rem 1.75rem;background:var(--cyan);color:#000;font-family:var(--font-display);font-weight:700;font-size:.8rem;letter-spacing:.06em;border-radius:8px;text-decoration:none;transition:all .3s;text-transform:uppercase;opacity:0;animation:fadeUp .9s ease 2.1s forwards}
+.hero-cta:hover{background:#00ffff;box-shadow:0 0 30px rgba(0,229,255,.4);transform:translateY(-2px)}
+.hero-cta svg{flex-shrink:0;transition:transform .3s}
+.hero-cta:hover svg{transform:translate(2px,-2px)}
+
+/* BOTTOM */
+.hero-bottom{padding:0 1.5rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;opacity:0;animation:fadeUp .9s ease 2.3s forwards}
+.hero-stats{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.02);backdrop-filter:blur(10px);width:100%;max-width:440px}
+.hstat{flex:1;padding:.85rem .5rem;text-align:center;display:flex;flex-direction:column;gap:.2rem}
+.hstat-num{font-family:var(--font-display);font-size:1.2rem;font-weight:800;color:var(--cyan);line-height:1}
+.hstat-label{font-family:var(--font-mono);font-size:.5rem;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.hstat-divider{width:1px;background:var(--border);align-self:stretch;flex-shrink:0}
+.scroll-hint{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.55rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase}
+.scroll-line{width:30px;height:1px;background:var(--muted);position:relative;overflow:hidden}
+.scroll-line::after{content:'';position:absolute;inset:0;background:var(--cyan);animation:scanline 2s ease infinite}
+@keyframes scanline{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
 /* STATS TICKER */
 .stats-bar{position:relative;z-index:2;padding:1.2rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;display:flex}
@@ -80,6 +107,151 @@ section{position:relative;z-index:2}
 .section-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;margin-bottom:.6rem}
 .section-title{font-family:var(--font-display);font-size:clamp(1.8rem,6vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1}
 .section-count{font-family:var(--font-display);font-size:3.5rem;font-weight:800;color:transparent;-webkit-text-stroke:1px var(--border);line-height:1}
+
+/* DEVICE SHOWCASE - LAPTOP + FLOATING PHONE */
+.device-showcase{
+  position:relative;
+  width:100%;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:2rem 1rem 1rem;
+}
+
+/* LAPTOP */
+.laptop-mock{
+  position:relative;
+  width:min(320px, 80vw);
+  flex-shrink:0;
+  filter:drop-shadow(0 30px 60px rgba(0,0,0,.7));
+}
+.laptop-screen{
+  background:#111827;
+  border-radius:8px 8px 0 0;
+  border:2px solid #2a2a3a;
+  overflow:hidden;
+  transform:perspective(800px) rotateY(4deg) rotateX(2deg);
+  transition:transform .6s ease;
+}
+.featured-card:hover .laptop-screen{
+  transform:perspective(800px) rotateY(0deg) rotateX(0deg);
+}
+.laptop-bar{
+  height:22px;
+  background:#1a1a2e;
+  display:flex;
+  align-items:center;
+  padding:0 8px;
+  gap:4px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.lb-dot{
+  width:6px;height:6px;border-radius:50%;
+}
+.lb-dot:nth-child(1){background:#ff5f57;}
+.lb-dot:nth-child(2){background:#ffbd2e;}
+.lb-dot:nth-child(3){background:#28ca41;}
+.lb-url{
+  flex:1;
+  background:rgba(255,255,255,.06);
+  border-radius:3px;
+  padding:2px 8px;
+  font-family:var(--font-mono);
+  font-size:.5rem;
+  color:var(--muted);
+  margin-left:6px;
+}
+.laptop-display{
+  aspect-ratio:16/10;
+  overflow:hidden;
+  background:#080812;
+}
+.laptop-display img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:top;
+  display:block;
+  transition:transform 8s ease;
+}
+.featured-card:hover .laptop-display img{
+  transform:translateY(-15%);
+}
+.laptop-hinge{
+  height:6px;
+  background:linear-gradient(to bottom, #1a1a2e, #0d0d18);
+  border-left:2px solid #2a2a3a;
+  border-right:2px solid #2a2a3a;
+}
+.laptop-base{
+  height:14px;
+  background:linear-gradient(to bottom,#151520,#0a0a14);
+  border:2px solid #2a2a3a;
+  border-top:none;
+  border-radius:0 0 6px 6px;
+}
+
+/* FLOATING PHONE - overlaps laptop bottom right */
+.floating-phone{
+  position:absolute;
+  bottom:-10px;
+  right:calc(50% - min(160px,40vw));
+  width:min(90px,22vw);
+  background:#0d0d18;
+  border-radius:14px;
+  border:1.5px solid rgba(0,229,255,.25);
+  box-shadow:0 20px 50px rgba(0,0,0,.7), 0 0 20px rgba(0,229,255,.1);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:6px 4px 8px;
+  gap:4px;
+  transform:perspective(600px) rotateY(-6deg) rotateX(2deg);
+  transition:transform .6s ease;
+  z-index:10;
+  animation:floatPhone 4s ease-in-out infinite;
+}
+@keyframes floatPhone{
+  0%,100%{transform:perspective(600px) rotateY(-6deg) rotateX(2deg) translateY(0)}
+  50%{transform:perspective(600px) rotateY(-6deg) rotateX(2deg) translateY(-6px)}
+}
+.featured-card:hover .floating-phone{
+  animation:none;
+  transform:perspective(600px) rotateY(0deg) rotateX(0deg) translateY(-4px);
+}
+.fp-speaker{
+  width:20px;height:3px;
+  background:#1e1e2e;border-radius:2px;
+}
+.fp-screen{
+  width:100%;
+  border-radius:8px;
+  overflow:hidden;
+  background:#080812;
+  aspect-ratio:9/18;
+}
+.fp-screen img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:top;
+  display:block;
+}
+.fp-home{
+  width:20px;height:3px;
+  background:#1e1e2e;border-radius:2px;
+}
+.fp-badge{
+  position:absolute;
+  top:-8px;right:-8px;
+  background:var(--cyan);
+  color:#000;
+  font-family:var(--font-mono);
+  font-size:.45rem;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:2px 6px;
+  border-radius:100px;
+}
 
 /* FEATURED - MOBILE FIRST */
 #featured{padding:0 1.25rem 3rem}
@@ -251,13 +423,45 @@ footer{padding:2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-
 
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-tag">Selected Work · 2024 — 2025</div>
-  <h1 class="hero-title">
-    <span class="plain">Digital</span>
-    <span class="accent">Ecosystems</span>
-    <span class="glow">That Perform</span>
-  </h1>
-  <p class="hero-sub">From Shopify stores to full-stack delivery platforms with mobile apps — every project built to convert, scale and dominate AI-era search.</p>
+  <!-- TOP: Agency label -->
+  <div class="hero-top">
+    <div class="hero-agency-tag">
+      <span class="pulse-dot"></span>
+      AI-Powered Digital Agency · Manchester, UK
+    </div>
+  </div>
+
+  <!-- CENTRE: Main content -->
+  <div class="hero-centre">
+    <div class="hero-tag">Selected Work · 2024 — 2025</div>
+    <h1 class="hero-title">
+      <span class="plain">Digital</span>
+      <span class="accent">Ecosystems</span>
+      <span class="glow">That Perform</span>
+    </h1>
+    <p class="hero-sub">From Shopify stores to full-stack delivery platforms with mobile apps — every project built to convert, scale and dominate AI-era search.</p>
+    <a href="https://calendly.com/clymbmarketinguk/30min" target="_blank" class="hero-cta">
+      Start Your Project
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+    </a>
+  </div>
+
+  <!-- BOTTOM: Stats + scroll -->
+  <div class="hero-bottom">
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-num">50+</span><span class="hstat-label">Projects</span></div>
+      <div class="hstat-divider"></div>
+      <div class="hstat"><span class="hstat-num">5+</span><span class="hstat-label">Industries</span></div>
+      <div class="hstat-divider"></div>
+      <div class="hstat"><span class="hstat-num">3</span><span class="hstat-label">Countries</span></div>
+      <div class="hstat-divider"></div>
+      <div class="hstat"><span class="hstat-num">1</span><span class="hstat-label">App Ecosystem</span></div>
+    </div>
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </div>
 </section>
 
 <!-- STATS TICKER -->
@@ -290,18 +494,27 @@ footer{padding:2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-
   <div class="featured-card reveal">
     <div class="featured-glow"></div>
     <div class="featured-visual">
-      <div class="app-previews">
-        <div class="phone-mock side">
-          <div class="phone-bar"><div class="phone-notch"></div></div>
-          <div class="phone-screen" style="height:220px">
-            <img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/screenshot-2026-05-20-at-14.50.22-Xh6o8Zs5sBujsVRk.png" alt="Grabbi App" style="height:220px">
+      <div class="device-showcase">
+        <div class="laptop-mock">
+          <div class="laptop-screen">
+            <div class="laptop-bar">
+              <div class="lb-dot"></div><div class="lb-dot"></div><div class="lb-dot"></div>
+              <div class="lb-url">grabbi.uk</div>
+            </div>
+            <div class="laptop-display">
+              <img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/1-Tu1qF1CTCH39QYS1.png" alt="Grabbi Website">
+            </div>
           </div>
+          <div class="laptop-hinge"></div>
+          <div class="laptop-base"></div>
         </div>
-        <div class="phone-mock main">
-          <div class="phone-bar"><div class="phone-notch"></div></div>
-          <div class="phone-screen" style="height:280px">
-            <img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/1-Tu1qF1CTCH39QYS1.png" alt="Grabbi Website" style="height:280px">
+        <div class="floating-phone">
+          <div class="fp-speaker"></div>
+          <div class="fp-screen">
+            <img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/screenshot-2026-05-20-at-14.50.22-Xh6o8Zs5sBujsVRk.png" alt="Grabbi App">
           </div>
+          <div class="fp-home"></div>
+          <div class="fp-badge">App</div>
         </div>
       </div>
     </div>
@@ -559,11 +772,8 @@ if(!isMobile||window.innerWidth>768){
 
 window.addEventListener('resize',()=>{pc.width=window.innerWidth;pc.height=window.innerHeight;});
 
-// GSAP
+// GSAP SCROLL REVEALS ONLY
 gsap.registerPlugin(ScrollTrigger);
-gsap.to('.hero-tag',{opacity:1,y:0,duration:.9,delay:1.5,ease:'power3.out'});
-gsap.to('.hero-title',{opacity:1,y:0,duration:1.1,delay:1.7,ease:'power3.out'});
-gsap.to('.hero-sub',{opacity:1,y:0,duration:.9,delay:1.95,ease:'power3.out'});
 gsap.utils.toArray('.reveal').forEach((el,i)=>{
   gsap.fromTo(el,{opacity:0,y:35},{opacity:1,y:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 90%',toggleActions:'play none none none'},delay:(i%3)*.08});
 });
