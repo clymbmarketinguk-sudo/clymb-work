@@ -49,6 +49,9 @@ background-size:64px 64px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,
 
 /* NAV - MOBILE FIRST */
 nav{position:fixed;top:0;left:0;right:0;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;z-index:100;background:linear-gradient(to bottom,rgba(5,5,8,.95),transparent);backdrop-filter:blur(12px)}
+.nav-logo-img{display:flex;align-items:center;text-decoration:none;}
+.logo-img{height:40px;width:auto;object-fit:contain;filter:brightness(0) invert(1);transition:filter .3s, transform .3s;}
+.nav-logo-img:hover .logo-img{filter:brightness(0) saturate(100%) invert(78%) sepia(97%) saturate(1000%) hue-rotate(155deg) brightness(103%) contrast(101%);transform:scale(1.05);}
 .nav-logo{font-family:var(--font-display);font-size:1.2rem;font-weight:800;color:var(--white);text-decoration:none;letter-spacing:-.02em}
 .nav-logo span{color:var(--cyan)}
 .nav-link{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .3s;padding:.4rem .75rem;border:1px solid var(--border);border-radius:100px}
@@ -405,7 +408,7 @@ footer{padding:2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-
 <body>
 
 <div id="loader">
-  <div class="loader-logo">CLYMB<span>.</span></div>
+  <div class="loader-logo"><img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/clymb-marketing-logo2-lI8jNrpGDBHvsjjz.png" alt="CLYMB" style="height:60px;width:auto;filter:brightness(0) invert(1)"></div>
   <div class="loader-bar"><div class="loader-fill"></div></div>
   <div class="loader-txt">Loading Portfolio</div>
 </div>
@@ -417,7 +420,9 @@ footer{padding:2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-
 <canvas id="hero-canvas"></canvas>
 
 <nav>
-  <a href="https://clymb.marketing/" class="nav-logo">CLYMB<span>.</span></a>
+  <a href="https://clymb.marketing/" class="nav-logo-img">
+    <img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/clymb-marketing-logo2-lI8jNrpGDBHvsjjz.png" alt="CLYMB" class="logo-img">
+  </a>
   <a href="https://clymb.marketing/" class="nav-link">← Home</a>
 </nav>
 
@@ -710,7 +715,7 @@ footer{padding:2rem 1.5rem;border-top:1px solid var(--border);display:flex;flex-
 </section>
 
 <footer>
-  <div class="footer-logo">CLYMB<span>.</span></div>
+  <div class="footer-logo"><img src="https://assets.zyrosite.com/A3Q78r1elWiEBvyx/clymb-marketing-logo2-lI8jNrpGDBHvsjjz.png" alt="CLYMB" style="height:36px;width:auto"></div>
   <div class="footer-copy">© 2025 CLYMB Marketing · UK</div>
 </footer>
 
